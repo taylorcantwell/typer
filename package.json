@@ -1,0 +1,42 @@
+{
+  "name": "typer-challenge",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "postinstall": "prisma generate",
+    "db:migrate": "prisma db push"
+  },
+  "dependencies": {
+    "@chakra-ui/icons": "^2.0.6",
+    "@chakra-ui/react": "^2.2.6",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "@prisma/client": "^4.1.1",
+    "@trpc/client": "^9.26.2",
+    "@trpc/next": "^9.26.2",
+    "@trpc/react": "^9.26.2",
+    "@trpc/server": "^9.26.2",
+    "framer-motion": "^6",
+    "next": "12.2.3",
+    "react": "18.2.0",
+    "react-confetti": "^6.1.0",
+    "react-dom": "18.2.0",
+    "react-query": "^3.39.2",
+    "react-use": "^17.4.0",
+    "superjson": "^1.9.1",
+    "zod": "^3.17.3"
+  },
+  "devDependencies": {
+    "@types/node": "18.0.0",
+    "@types/react": "18.0.14",
+    "@types/react-dom": "18.0.5",
+    "eslint": "8.18.0",
+    "eslint-config-next": "12.2.3",
+    "prisma": "^4.1.1",
+    "typescript": "4.7.4"
+  }
+}
