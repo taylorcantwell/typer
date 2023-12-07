@@ -10,53 +10,54 @@ import {
   Stack,
   Text,
 } from '@chakra-ui/react';
-import { useState } from 'react';
+import { useRouter } from 'next/router';
+import * as React from 'react';
 import Confetti from 'react-confetti';
 import { useWindowSize } from 'react-use';
 import { trpc } from '../../../utils/trpc';
-import { useRouter } from 'next/router';
+
+type Results = {
+  accuracy: number;
+  charactersPerMinute: number;
+  mistakes: number;
+};
 
 type LeaderBoardSubmissionModalProps = {
   onClose: () => void;
   isOpen: boolean;
-  results: {
-    accuracy: number;
-    charactersPerMinute: number;
-    mistakes: number;
-  };
+  results: Results;
 };
 
-export const LeaderboardSubmissionModal = ({
-  isOpen,
-  onClose,
-  results: { accuracy, charactersPerMinute, mistakes },
-}: LeaderBoardSubmissionModalProps) => {
-  const { width, height } = useWindowSize();
-  const [name, setName] = useState('Anonymous');
+export function LeaderboardSubmissionModal(
+  props: LeaderBoardSubmissionModalProps
+) {
+  const [name, setName] = React.useState('Anonymous');
   const router = useRouter();
   const { mutateAsync: submitToLeaderboard, isLoading } = trpc.useMutation([
     'leaderboard.add-to-leader-board',
   ]);
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} isCentered size="xl">
-      <Confetti width={width} height={height} />
+    <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered size="xl">
+      <ConfettiWrapper />
       <ModalContent color="yellow.400">
         <ModalHeader>You made it on the leaderboard!</ModalHeader>
         <ModalCloseButton color="gray.400" />
+
         <ModalBody>
           <Stack mb={6}>
-            <Text>Accuracy: {accuracy}%</Text>
-            <Text>Mistakes: {mistakes}</Text>
-            <Text>CPM: {charactersPerMinute}</Text>
+            <Text>Accuracy: {props.results.accuracy}%</Text>
+            <Text>Mistakes: {props.results.mistakes}</Text>
+            <Text>CPM: {props.results.charactersPerMinute}</Text>
           </Stack>
           <Input
             onChange={(e) => setName(e.target.value)}
             placeholder="Add your name"
           />
         </ModalBody>
+
         <ModalFooter>
-          <Button mr={3} variant="ghost" onClick={onClose}>
+          <Button mr={3} variant="ghost" onClick={props.onClose}>
             Not Interested
           </Button>
           <Button
@@ -64,9 +65,9 @@ export const LeaderboardSubmissionModal = ({
             isLoading={isLoading}
             onClick={async () => {
               await submitToLeaderboard({
-                accuracy: accuracy + '%',
-                cpm: charactersPerMinute,
-                mistakes,
+                accuracy: `${props.results.accuracy}%`,
+                cpm: props.results.charactersPerMinute,
+                mistakes: props.results.mistakes,
                 name,
               });
 
@@ -79,4 +80,9 @@ export const LeaderboardSubmissionModal = ({
       </ModalContent>
     </Modal>
   );
+}
+
+const ConfettiWrapper = () => {
+  const { width, height } = useWindowSize();
+  return <Confetti width={width} height={height} />;
 };

@@ -47,8 +47,10 @@ export const LeaderBoard = () => {
         </Thead>
         <Tbody>
           {data.map((record) => {
+            const key = `${record.createdAt.toDateString()}-${record.name}`;
+
             return (
-              <Tr color="gray.400" key={record.createdAt.toDateString()}>
+              <Tr color="gray.400" key={key}>
                 <Td>{record.name}</Td>
                 <Td>{record.createdAt.toDateString()}</Td>
                 <Td>{record.cpm}</Td>

@@ -4,21 +4,23 @@ import { createRouter } from '../createRouter';
 export const leaderboardRouter = createRouter()
   .query('check-if-made-leader-board', {
     input: z.number().min(1).max(1000),
-    async resolve({ input, ctx }) {
-      const leaderBoard = await ctx.prisma.leaderBoard.findMany({
-        orderBy: {
-          cpm: 'desc',
-        },
-        take: 10,
-        skip: 9,
-      });
+    async resolve({ input: cpm, ctx }) {
+      const [lastPositionOnLeaderBoard] = await ctx.prisma.leaderBoard.findMany(
+        {
+          orderBy: {
+            cpm: 'desc',
+          },
+          take: 10,
+          skip: 9,
+        }
+      );
 
-      if (leaderBoard?.length === 0) {
+      if (!lastPositionOnLeaderBoard) {
         return true;
       }
 
-      if (leaderBoard?.[0]) {
-        if (input > leaderBoard[0].cpm) {
+      if (lastPositionOnLeaderBoard) {
+        if (cpm > lastPositionOnLeaderBoard.cpm) {
           return true;
         }
       }
@@ -28,14 +30,12 @@ export const leaderboardRouter = createRouter()
   })
   .query('get-leader-board', {
     async resolve({ ctx }) {
-      const leaderBoard = await ctx.prisma.leaderBoard.findMany({
+      return await ctx.prisma.leaderBoard.findMany({
         orderBy: {
           cpm: 'desc',
         },
         take: 10,
       });
-
-      return leaderBoard;
     },
   })
   .mutation('add-to-leader-board', {
@@ -46,15 +46,8 @@ export const leaderboardRouter = createRouter()
       mistakes: z.number().min(0).max(1000),
     }),
     async resolve({ input, ctx }) {
-      const { name, cpm, accuracy, mistakes } = input;
-
       await ctx.prisma.leaderBoard.create({
-        data: {
-          name,
-          cpm,
-          accuracy,
-          mistakes,
-        },
+        data: input,
       });
 
       return { success: true };

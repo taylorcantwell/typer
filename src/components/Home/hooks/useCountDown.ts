@@ -1,43 +1,38 @@
-import { useEffect } from 'react';
+import * as React from 'react';
 import { useMethods } from 'react-use';
 
 export const useCountDown = (countDown: number) => {
-  const [state, methods] = useMethods(createMethods, {
+  const [state, counter] = useMethods(createMethods, {
     countDown,
     currentTime: countDown,
     expired: false,
     paused: true,
   });
 
-  useEffect(
-    function init() {
-      if (state.currentTime === 0 && !state.expired) {
-        methods.expire();
-        return;
-      }
+  const intervalRef = React.useRef<NodeJS.Timeout | null>(null);
 
-      if (state.paused === true) {
-        return;
-      }
+  React.useEffect(
+    function startCounter() {
+      if (state.paused === true) return;
 
-      const interval = setInterval(() => {
-        if (state.currentTime === 0) {
-          clearInterval(interval);
-          return;
-        }
-
-        methods.tick();
-      }, 1000);
-      return () => clearInterval(interval);
+      intervalRef.current = setInterval(() => counter.tick(), 1000);
+      return () => clearInterval(intervalRef.current!);
     },
-    [state.currentTime, state.expired, state.paused]
+    [state.paused]
   );
+
+  React.useEffect(function expire() {
+    if (state.currentTime === 0) {
+      counter.expire();
+      return clearInterval(intervalRef.current!);
+    }
+  });
 
   return {
     state,
-    stopCountDown: methods.stopCountDown,
-    resetCountDown: methods.resetCountDown,
-    startCountDown: methods.startCountDown,
+    stop: counter.stop,
+    start: counter.start,
+    reset: counter.reset,
   };
 };
 
@@ -50,13 +45,13 @@ type IntialState = {
 
 const createMethods = (state: IntialState) => {
   return {
-    stopCountDown() {
+    stop() {
       return { ...state, paused: true };
     },
     expire() {
       return { ...state, expired: true };
     },
-    resetCountDown() {
+    reset() {
       return {
         ...state,
         currentTime: state.countDown,
@@ -64,7 +59,7 @@ const createMethods = (state: IntialState) => {
         paused: true,
       };
     },
-    startCountDown() {
+    start() {
       return { ...state, paused: false };
     },
     tick() {

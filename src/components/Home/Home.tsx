@@ -32,9 +32,9 @@ export const Home = () => {
     wordCount: 30,
   });
 
-  const { isOpen, onOpen, onClose } = useDisclosure();
-  const isActive = typerState === 'typing';
-  const isFinished = typerState === 'finished';
+  const leaderBoardModal = useDisclosure();
+  const isPlaying = typerState === 'typing';
+  const isGameOver = typerState === 'finished';
 
   const { data: hasMadeLeaderboard } = trpc.useQuery([
     'leaderboard.check-if-made-leader-board',
@@ -43,18 +43,18 @@ export const Home = () => {
 
   useEffect(
     function checkIfMadeLeaderboard() {
-      if (isFinished) {
-        hasMadeLeaderboard && onOpen();
+      if (isGameOver) {
+        hasMadeLeaderboard && leaderBoardModal.onOpen();
       }
     },
-    [isFinished, onOpen, hasMadeLeaderboard]
+    [isGameOver, leaderBoardModal.onOpen, hasMadeLeaderboard]
   );
 
   return (
     <>
       <LeaderboardSubmissionModal
-        isOpen={isOpen}
-        onClose={onClose}
+        isOpen={leaderBoardModal.isOpen}
+        onClose={leaderBoardModal.onClose}
         results={{
           accuracy,
           charactersPerMinute,
@@ -77,7 +77,7 @@ export const Home = () => {
           <Box position="relative" wordBreak="break-all" fontWeight="semibold">
             <Box position="absolute" inset="0">
               <Text as="samp">{input}</Text>
-              {isActive && <Cursor />}
+              {isPlaying && <Cursor />}
             </Box>
             <Text as="samp" color="gray.400">
               {randomWords}
@@ -86,18 +86,17 @@ export const Home = () => {
         </Box>
 
         <Button
-          aria-disabled={!isFinished}
+          aria-disabled={!isGameOver}
           color="gray.300"
           variant="link"
           fontSize="xl"
           mt={4}
-          onClick={() => reset()}
-          tabIndex={-1}
-          disabled={!isFinished}
+          onClick={reset}
+          disabled={!isGameOver}
         >
           <motion.div
-            key={`${isFinished}`}
-            animate={isFinished && { scale: [1, 1.1, 1] }}
+            key={`${isGameOver}`}
+            animate={isGameOver && { scale: [1, 1.1, 1] }}
             transition={{
               duration: 0.5,
               ease: 'easeInOut',

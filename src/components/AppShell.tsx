@@ -25,7 +25,12 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
         fontWeight="bold"
       >
         <NextLink href="/" passHref>
-          <Link textDecoration={currentRoute === '/' ? 'underline' : 'none'}>
+          <Link
+            _activeLink={{
+              textDecoration: 'underline',
+            }}
+            // textDecoration={currentRoute === '/' ? 'underline' : 'none'}
+          >
             Type Challenge
           </Link>
         </NextLink>

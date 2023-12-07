@@ -1,29 +1,28 @@
-import { useEffect } from 'react';
 import { useEvent, useMethods } from 'react-use';
 import { useCountDown } from './useCountDown';
+import * as React from 'react';
 
-export const useTyper = (options: { time: number; wordCount: number }) => {
-  const { time, wordCount } = options;
-  const {
-    state: countDownState,
-    startCountDown,
-    stopCountDown,
-    resetCountDown,
-  } = useCountDown(time);
+type UseTyperOptions = {
+  time: number;
+  wordCount: number;
+};
+
+export function useTyper(options: UseTyperOptions) {
+  const counter = useCountDown(options.time);
 
   const initialState = {
-    state: 'idle',
-    randomWords: generateRandomWords(wordCount),
+    gameState: 'idle',
+    randomWords: generateRandomWords(options.wordCount),
     input: '',
-    countDown: countDownState.currentTime,
+    countDown: options.time,
     currentPosition: 0,
     mistakes: 0,
   };
 
   function createMethods(state: typeof initialState) {
     return {
-      onReset() {
-        resetCountDown();
+      restartGame() {
+        counter.reset();
         return initialState;
       },
       onMatch(key: string) {
@@ -33,63 +32,65 @@ export const useTyper = (options: { time: number; wordCount: number }) => {
           currentPosition: state.currentPosition + 1,
         };
       },
-      setAppState(newState: 'idle' | 'typing' | 'finished') {
-        return { ...state, state: newState };
+      setGameState(newState: 'idle' | 'typing' | 'finished') {
+        return { ...state, gameState: newState };
       },
-      onMistake() {
+      incrementMistakeCounter() {
         return { ...state, mistakes: state.mistakes + 1 };
       },
     };
   }
 
-  const [{ randomWords, state, input, currentPosition, mistakes }, methods] =
-    useMethods(createMethods, initialState);
+  const [state, setState] = useMethods(createMethods, initialState);
 
-  useEffect(function onCountDownEnd() {
-    if (countDownState.expired && state === 'typing') {
-      methods.setAppState('finished');
-    }
-  });
+  React.useEffect(
+    function onCountDownEnd() {
+      if (counter.state.expired) {
+        setState.setGameState('finished');
+      }
+    },
+    [counter.state.expired, setState.setGameState]
+  );
 
   useEvent('keydown', ({ key, code }: KeyboardEvent) => {
-    if (state === 'finished' || !isKeyboardCodeAllowed(code)) {
-      return;
+    if (state.gameState === 'finished' || !isKeyboardCodeAllowed(code)) return;
+
+    if (state.gameState === 'idle') {
+      setState.setGameState('typing');
+      counter.start();
     }
 
-    if (state === 'idle') {
-      methods.setAppState('typing');
-      startCountDown();
-    }
+    if (key === state.randomWords[state.currentPosition]) {
+      setState.onMatch(key);
 
-    if (key === randomWords[currentPosition]) {
-      methods.onMatch(key);
-
-      if (currentPosition === randomWords.length - 1) {
-        methods.setAppState('finished');
-        stopCountDown();
+      const isLastLetter =
+        state.currentPosition === state.randomWords.length - 1;
+      if (isLastLetter) {
+        setState.setGameState('finished');
+        counter.stop();
       }
     } else {
-      methods.onMistake();
+      setState.incrementMistakeCounter();
     }
   });
 
-  const accuracy = calculateAccuracy(currentPosition, mistakes);
+  const accuracy = calculateAccuracy(state.currentPosition, state.mistakes);
   const charactersPerMinute = calculateCPM(
-    currentPosition,
-    time - countDownState.currentTime
+    state.currentPosition,
+    options.time - counter.state.currentTime
   );
 
   return {
     typerState: state,
     randomWords,
     input,
-    remainingTime: countDownState.currentTime,
+    remainingTime: counter.state.currentTime,
     accuracy,
     charactersPerMinute,
     mistakes,
     reset: methods.onReset,
   };
-};
+}
 
 const isKeyboardCodeAllowed = (code: string) => {
   return code.startsWith('Key') || code === 'Space';
