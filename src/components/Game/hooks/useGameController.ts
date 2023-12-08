@@ -3,23 +3,25 @@ import * as React from 'react';
 
 import { useCountDown } from './useCountDown';
 
-type UseGameControllerOptions = {
-  time: number;
-  wordCount: number;
-};
+type GameStatus = 'idle' | 'typing' | 'finished';
 
 const initialState = {
-  gameStatus: 'idle' as 'idle' | 'typing' | 'finished',
+  gameStatus: 'idle' as GameStatus,
   input: '',
   countDown: 0,
   currentPosition: 0,
   mistakeCount: 0,
 };
 
+type UseGameControllerOptions = {
+  time: number;
+  wordCount: number;
+};
+
 export function useGameController(options: UseGameControllerOptions) {
   const counter = useCountDown(options.time);
 
-  const [state, setState] = useMethods(
+  const [gameState, gameController] = useMethods(
     (state) => {
       return {
         restart() {
@@ -29,14 +31,14 @@ export function useGameController(options: UseGameControllerOptions) {
             words: generateRandomWords(options.wordCount),
           };
         },
-        onMatch(key: string) {
+        incrementPosition(key: string) {
           return {
             ...state,
             input: state.input.concat(key),
             currentPosition: state.currentPosition + 1,
           };
         },
-        setGameState(newState: 'idle' | 'typing' | 'finished') {
+        setGameStatus(newState: GameStatus) {
           return { ...state, gameStatus: newState };
         },
         incrementMistakeCounter() {
@@ -52,48 +54,55 @@ export function useGameController(options: UseGameControllerOptions) {
 
   React.useEffect(
     function onCountDownEnd() {
-      if (counter.state.expired && state.gameStatus !== 'finished') {
-        setState.setGameState('finished');
+      if (counter.state.expired && gameState.gameStatus !== 'finished') {
+        gameController.setGameStatus('finished');
       }
     },
-    [counter.state.expired, setState, setState.setGameState]
+    [counter.state.expired, gameController, gameController.setGameStatus]
   );
 
   useEvent('keydown', (event: KeyboardEvent) => {
-    if (state.gameStatus === 'finished' || !isKeyboardCodeAllowed(event.code)) {
+    if (
+      gameState.gameStatus === 'finished' ||
+      !isKeyboardCodeAllowed(event.code)
+    ) {
       return;
     }
 
-    if (state.gameStatus === 'idle') {
-      setState.setGameState('typing');
+    if (gameState.gameStatus === 'idle') {
+      gameController.setGameStatus('typing');
       counter.start();
     }
 
-    if (event.key === state.words[state.currentPosition]) {
-      setState.onMatch(event.key);
+    if (event.key === gameState.words[gameState.currentPosition]) {
+      gameController.incrementPosition(event.key);
 
-      const isLastLetter = state.currentPosition === state.words.length - 1;
+      const isLastLetter =
+        gameState.currentPosition === gameState.words.length - 1;
       if (isLastLetter) {
-        setState.setGameState('finished');
+        gameController.setGameStatus('finished');
         counter.stop();
       }
     } else {
-      setState.incrementMistakeCounter();
+      gameController.incrementMistakeCounter();
     }
   });
 
   return {
-    gameStatus: state.gameStatus,
-    words: state.words,
-    input: state.input,
+    gameStatus: gameState.gameStatus,
+    words: gameState.words,
+    input: gameState.input,
     remainingTime: counter.state.currentTime,
-    accuracy: calculateAccuracy(state.currentPosition, state.mistakeCount),
+    accuracy: calculateAccuracy(
+      gameState.currentPosition,
+      gameState.mistakeCount
+    ),
     charactersPerMinute: calculateCharactersPerMinute(
-      state.currentPosition,
+      gameState.currentPosition,
       options.time - counter.state.currentTime
     ),
-    mistakeCount: state.mistakeCount,
-    restart: setState.restart,
+    mistakeCount: gameState.mistakeCount,
+    restart: gameController.restart,
   };
 }
 
@@ -109,18 +118,18 @@ function calculateCharactersPerMinute(
   return Math.round(characters / (time / 60));
 }
 
-function calculateAccuracy(correct: number, mistakes: number): number {
-  if (!correct && !mistakes) return 0;
-  return Math.round((correct / (correct + mistakes)) * 100);
+function calculateAccuracy(correctCount: number, mistakeCount: number): number {
+  if (!correctCount && !mistakeCount) return 0;
+  return Math.round((correctCount / (correctCount + mistakeCount)) * 100);
 }
 
-function generateRandomWords(count: number): string {
-  if (count < 1) {
+function generateRandomWords(wordCount: number): string {
+  if (wordCount < 1) {
     throw new Error('Word count must be greater than 0');
   }
 
   return Array.from(
-    { length: count },
+    { length: wordCount },
     () => words[Math.floor(Math.random() * words.length)]
   ).join(' ');
 }
