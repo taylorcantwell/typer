@@ -8,19 +8,17 @@ export const leaderboardRouter = createRouter()
       const [lastPositionOnLeaderBoard] = await ctx.prisma.leaderBoard.findMany(
         {
           orderBy: {
-            cpm: 'desc',
+            charactersPerMinute: 'desc',
           },
           take: 10,
           skip: 9,
         }
       );
 
-      if (!lastPositionOnLeaderBoard) {
-        return true;
-      }
+      if (!lastPositionOnLeaderBoard) return true;
 
       if (lastPositionOnLeaderBoard) {
-        if (cpm > lastPositionOnLeaderBoard.cpm) {
+        if (cpm > lastPositionOnLeaderBoard.charactersPerMinute) {
           return true;
         }
       }
@@ -28,22 +26,22 @@ export const leaderboardRouter = createRouter()
       return false;
     },
   })
-  .query('get-leader-board', {
+  .query('get', {
     async resolve({ ctx }) {
       return await ctx.prisma.leaderBoard.findMany({
         orderBy: {
-          cpm: 'desc',
+          charactersPerMinute: 'desc',
         },
         take: 10,
       });
     },
   })
-  .mutation('add-to-leader-board', {
+  .mutation('add', {
     input: z.object({
       name: z.string().min(3).max(50),
-      cpm: z.number().min(0),
-      accuracy: z.string().min(0),
-      mistakes: z.number().min(0).max(1000),
+      charactersPerMinute: z.number().min(0),
+      accuracyPercent: z.number().min(0),
+      mistakeCount: z.number().min(0).max(1000),
     }),
     async resolve({ input, ctx }) {
       await ctx.prisma.leaderBoard.create({

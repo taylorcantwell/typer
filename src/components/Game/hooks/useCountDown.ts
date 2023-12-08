@@ -1,7 +1,7 @@
 import * as React from 'react';
 import { useMethods } from 'react-use';
 
-export const useCountDown = (countDown: number) => {
+export function useCountDown(countDown: number) {
   const [state, counter] = useMethods(createMethods, {
     countDown,
     currentTime: countDown,
@@ -22,7 +22,7 @@ export const useCountDown = (countDown: number) => {
   );
 
   React.useEffect(function expire() {
-    if (state.currentTime === 0) {
+    if (state.currentTime === 0 && !state.expired) {
       counter.expire();
       return clearInterval(intervalRef.current!);
     }
@@ -34,7 +34,7 @@ export const useCountDown = (countDown: number) => {
     start: counter.start,
     reset: counter.reset,
   };
-};
+}
 
 type IntialState = {
   countDown: number;
@@ -43,7 +43,7 @@ type IntialState = {
   paused: boolean;
 };
 
-const createMethods = (state: IntialState) => {
+function createMethods(state: IntialState) {
   return {
     stop() {
       return { ...state, paused: true };
@@ -66,4 +66,4 @@ const createMethods = (state: IntialState) => {
       return { ...state, currentTime: state.currentTime - 1 };
     },
   };
-};
+}

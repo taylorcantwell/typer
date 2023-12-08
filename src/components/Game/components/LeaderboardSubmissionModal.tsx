@@ -13,13 +13,14 @@ import {
 import { useRouter } from 'next/router';
 import * as React from 'react';
 import Confetti from 'react-confetti';
+
 import { useWindowSize } from 'react-use';
 import { trpc } from '../../../utils/trpc';
 
 type Results = {
-  accuracy: number;
+  accuracyPercent: number;
   charactersPerMinute: number;
-  mistakes: number;
+  mistakeCount: number;
 };
 
 type LeaderBoardSubmissionModalProps = {
@@ -33,9 +34,7 @@ export function LeaderboardSubmissionModal(
 ) {
   const [name, setName] = React.useState('Anonymous');
   const router = useRouter();
-  const { mutateAsync: submitToLeaderboard, isLoading } = trpc.useMutation([
-    'leaderboard.add-to-leader-board',
-  ]);
+  const addToLeaderboardMutation = trpc.useMutation(['leaderboard.add']);
 
   return (
     <Modal isOpen={props.isOpen} onClose={props.onClose} isCentered size="xl">
@@ -46,8 +45,8 @@ export function LeaderboardSubmissionModal(
 
         <ModalBody>
           <Stack mb={6}>
-            <Text>Accuracy: {props.results.accuracy}%</Text>
-            <Text>Mistakes: {props.results.mistakes}</Text>
+            <Text>Accuracy: {props.results.accuracyPercent}%</Text>
+            <Text>Mistakes: {props.results.mistakeCount}</Text>
             <Text>CPM: {props.results.charactersPerMinute}</Text>
           </Stack>
           <Input
@@ -62,12 +61,12 @@ export function LeaderboardSubmissionModal(
           </Button>
           <Button
             colorScheme="yellow"
-            isLoading={isLoading}
+            isLoading={addToLeaderboardMutation.isLoading}
             onClick={async () => {
-              await submitToLeaderboard({
-                accuracy: `${props.results.accuracy}%`,
-                cpm: props.results.charactersPerMinute,
-                mistakes: props.results.mistakes,
+              await addToLeaderboardMutation.mutateAsync({
+                accuracyPercent: props.results.accuracyPercent,
+                charactersPerMinute: props.results.charactersPerMinute,
+                mistakeCount: props.results.mistakeCount,
                 name,
               });
 
@@ -82,7 +81,7 @@ export function LeaderboardSubmissionModal(
   );
 }
 
-const ConfettiWrapper = () => {
-  const { width, height } = useWindowSize();
-  return <Confetti width={width} height={height} />;
-};
+function ConfettiWrapper() {
+  const windowSize = useWindowSize();
+  return <Confetti width={windowSize.width} height={windowSize.height} />;
+}

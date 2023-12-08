@@ -2,7 +2,7 @@ import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 
 const Home = dynamic(
-  () => import('../components/Home/Home').then((module) => module.Home),
+  () => import('../components/Game/Game').then((module) => module.Game),
   { ssr: false }
 );
 

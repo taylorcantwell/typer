@@ -11,12 +11,13 @@ import {
   Tr,
   Link,
 } from '@chakra-ui/react';
+
 import { trpc } from '../utils/trpc';
 
-export const LeaderBoard = () => {
-  const { data } = trpc.useQuery(['leaderboard.get-leader-board']);
+export function LeaderBoard() {
+  const leaderboardQuery = trpc.useQuery(['leaderboard.get']);
 
-  if (!data) {
+  if (!leaderboardQuery.data) {
     return (
       <Center h={'80vh'}>
         <Spinner color="yellow.400" />
@@ -29,13 +30,15 @@ export const LeaderBoard = () => {
       <Table variant="simple">
         <TableCaption>
           Made by Taylor Cantwell -{' '}
-          <Link
-            textDecoration="underline"
+          <a
+            target="_blank"
+            rel="noopener noreferrer"
             href="https://github.com/taylorcantwell"
           >
             GitHub
-          </Link>
+          </a>
         </TableCaption>
+
         <Thead>
           <Tr>
             {titles.map((title) => (
@@ -45,17 +48,18 @@ export const LeaderBoard = () => {
             ))}
           </Tr>
         </Thead>
+
         <Tbody>
-          {data.map((record) => {
+          {leaderboardQuery.data.map((record) => {
             const key = `${record.createdAt.toDateString()}-${record.name}`;
 
             return (
               <Tr color="gray.400" key={key}>
                 <Td>{record.name}</Td>
                 <Td>{record.createdAt.toDateString()}</Td>
-                <Td>{record.cpm}</Td>
-                <Td>{record.accuracy}</Td>
-                <Td>{record.mistakes}</Td>
+                <Td>{record.charactersPerMinute}</Td>
+                <Td>{record.accuracyPercent}</Td>
+                <Td>{record.mistakeCount}</Td>
               </Tr>
             );
           })}
@@ -63,6 +67,6 @@ export const LeaderBoard = () => {
       </Table>
     </TableContainer>
   );
-};
+}
 
-const titles = ['Name', 'Date', 'CPM', 'Accuracy', 'Mistakes'];
+const titles = ['Name', 'Date', 'CPM', 'Accuracy', 'Mistakes'] as const;

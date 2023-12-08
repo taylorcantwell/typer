@@ -8,46 +8,38 @@ import {
   useDisclosure,
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
-import { useEffect } from 'react';
+import * as React from 'react';
+
 import { trpc } from '../../utils/trpc';
 import {
   Cursor,
   LeaderboardSubmissionModal,
   MistakeCounter,
 } from './components';
-import { useTyper } from './hooks';
+import { useGameController } from './hooks';
 
-export const Home = () => {
-  const {
-    typerState,
-    input,
-    randomWords,
-    remainingTime,
-    accuracy,
-    charactersPerMinute,
-    mistakes,
-    reset,
-  } = useTyper({
+export function Game() {
+  const gameController = useGameController({
     time: 20,
     wordCount: 30,
   });
 
   const leaderBoardModal = useDisclosure();
-  const isPlaying = typerState === 'typing';
-  const isGameOver = typerState === 'finished';
+  const isPlaying = gameController.gameStatus === 'typing';
+  const isGameOver = gameController.gameStatus === 'finished';
 
-  const { data: hasMadeLeaderboard } = trpc.useQuery([
+  const hasMadeLeaderboardQuery = trpc.useQuery([
     'leaderboard.check-if-made-leader-board',
-    charactersPerMinute,
+    gameController.charactersPerMinute,
   ]);
 
-  useEffect(
+  React.useEffect(
     function checkIfMadeLeaderboard() {
-      if (isGameOver) {
-        hasMadeLeaderboard && leaderBoardModal.onOpen();
+      if (isGameOver && !leaderBoardModal.isOpen) {
+        hasMadeLeaderboardQuery.data && leaderBoardModal.onOpen();
       }
     },
-    [isGameOver, leaderBoardModal.onOpen, hasMadeLeaderboard]
+    [isGameOver, leaderBoardModal.onOpen, hasMadeLeaderboardQuery.data]
   );
 
   return (
@@ -56,9 +48,9 @@ export const Home = () => {
         isOpen={leaderBoardModal.isOpen}
         onClose={leaderBoardModal.onClose}
         results={{
-          accuracy,
-          charactersPerMinute,
-          mistakes,
+          accuracyPercent: gameController.accuracy,
+          charactersPerMinute: gameController.charactersPerMinute,
+          mistakeCount: gameController.mistakeCount,
         }}
       />
 
@@ -71,16 +63,16 @@ export const Home = () => {
       >
         <Box userSelect="none" w="3xl" fontSize="30px">
           <Flex justifyContent="center">
-            <Text as="samp">{remainingTime}</Text>
+            <Text as="samp">{gameController.remainingTime}</Text>
           </Flex>
 
           <Box position="relative" wordBreak="break-all" fontWeight="semibold">
             <Box position="absolute" inset="0">
-              <Text as="samp">{input}</Text>
+              <Text as="samp">{gameController.input}</Text>
               {isPlaying && <Cursor />}
             </Box>
             <Text as="samp" color="gray.400">
-              {randomWords}
+              {gameController.words}
             </Text>
           </Box>
         </Box>
@@ -91,7 +83,7 @@ export const Home = () => {
           variant="link"
           fontSize="xl"
           mt={4}
-          onClick={reset}
+          onClick={gameController.restart}
           disabled={!isGameOver}
         >
           <motion.div
@@ -114,11 +106,11 @@ export const Home = () => {
           gap={8}
           alignItems="center"
         >
-          <Text as="samp">Accuracy: {accuracy}%</Text>
-          <Text as="samp">CPM: {charactersPerMinute}</Text>
-          <MistakeCounter mistakes={mistakes} />
+          <Text as="samp">Accuracy: {gameController.accuracy}%</Text>
+          <Text as="samp">CPM: {gameController.charactersPerMinute}</Text>
+          <MistakeCounter mistakes={gameController.mistakeCount} />
         </Flex>
       </Center>
     </>
   );
-};
+}

@@ -2,12 +2,12 @@ import { Box, Center, Link } from '@chakra-ui/react';
 import Head from 'next/head';
 import NextLink from 'next/link';
 import { useRouter } from 'next/router';
-import { ReactNode } from 'react';
 
-export const AppShell = ({ children }: { children: ReactNode }) => {
-  const router = useRouter();
-  const currentRoute = router.pathname;
+type AppShellProps = {
+  children: React.ReactNode;
+};
 
+export function AppShell(props: AppShellProps) {
   return (
     <>
       <Head>
@@ -24,27 +24,28 @@ export const AppShell = ({ children }: { children: ReactNode }) => {
         fontSize="2xl"
         fontWeight="bold"
       >
-        <NextLink href="/" passHref>
-          <Link
-            _activeLink={{
-              textDecoration: 'underline',
-            }}
-            // textDecoration={currentRoute === '/' ? 'underline' : 'none'}
-          >
-            Type Challenge
-          </Link>
-        </NextLink>
-        <NextLink href="/leaderboard" passHref>
-          <Link
-            textDecoration={
-              currentRoute === '/leaderboard' ? 'underline' : 'none'
-            }
-          >
-            Leaderboard
-          </Link>
-        </NextLink>
+        <NavLink href="/">Type Challenge</NavLink>
+        <NavLink href="/leaderboard">Leaderboard</NavLink>
       </Center>
-      <Box bg="gray.700">{children}</Box>
+      <Box bg="gray.700">{props.children}</Box>
     </>
   );
+}
+
+type NavLinkProps = {
+  href: string;
+  children: React.ReactNode;
 };
+
+function NavLink(props: NavLinkProps) {
+  const { asPath } = useRouter();
+  const isActive = asPath === props.href;
+
+  return (
+    <NextLink href={props.href} passHref>
+      <Link textDecoration={isActive ? 'underline' : 'none'}>
+        {props.children}
+      </Link>
+    </NextLink>
+  );
+}

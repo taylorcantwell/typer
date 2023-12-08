@@ -2,21 +2,22 @@ import { ChakraProvider } from '@chakra-ui/react';
 import { withTRPC } from '@trpc/next';
 import type { AppType } from 'next/dist/shared/lib/utils';
 import superjson from 'superjson';
+
 import { AppShell } from '../components/AppShell';
 import type { AppRouter } from '../server/router/root';
 import '../styles/globals.css';
 
-const MyApp: AppType = ({ Component, pageProps }) => {
+const MyApp: AppType = (props) => {
   return (
     <ChakraProvider>
       <AppShell>
-        <Component {...pageProps} />
+        <props.Component {...props.pageProps} />
       </AppShell>
     </ChakraProvider>
   );
 };
 
-const getBaseUrl = () => {
+function getBaseUrl() {
   if (typeof window !== 'undefined') {
     return '';
   }
@@ -24,7 +25,7 @@ const getBaseUrl = () => {
   if (process.env.VERCEL_URL) return `https://${process.env.VERCEL_URL}`;
 
   return `http://localhost:${process.env.PORT ?? 3000}`;
-};
+}
 
 export default withTRPC<AppRouter>({
   config() {
