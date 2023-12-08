@@ -74,11 +74,15 @@ export function useGameController(options: UseGameControllerOptions) {
       counter.start();
     }
 
-    if (event.key === gameState.words[gameState.currentPosition]) {
+    const isCorrectLetter =
+      event.key === gameState.words[gameState.currentPosition];
+
+    if (isCorrectLetter) {
       gameController.incrementPosition(event.key);
 
       const isLastLetter =
         gameState.currentPosition === gameState.words.length - 1;
+
       if (isLastLetter) {
         gameController.setGameStatus('finished');
         counter.stop();
@@ -111,11 +115,11 @@ function isKeyboardCodeAllowed(code: string): boolean {
 }
 
 function calculateCharactersPerMinute(
-  characters: number,
-  time: number
+  correctCharacterCount: number,
+  elapsedTimeSeconds: number
 ): number {
-  if (characters === 0 || time === 0) return 0;
-  return Math.round(characters / (time / 60));
+  if (correctCharacterCount === 0 || elapsedTimeSeconds === 0) return 0;
+  return Math.round(correctCharacterCount / (elapsedTimeSeconds / 60));
 }
 
 function calculateAccuracy(correctCount: number, mistakeCount: number): number {
