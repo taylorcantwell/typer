@@ -3,7 +3,7 @@ import { createRouter } from '../createRouter';
 
 export const leaderboardRouter = createRouter()
   .query('check-if-made-leader-board', {
-    input: z.number().min(1).max(1000),
+    input: z.number(),
     async resolve({ input: cpm, ctx }) {
       const [lastPositionOnLeaderBoard] = await ctx.prisma.leaderBoard.findMany(
         {

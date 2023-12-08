@@ -25,13 +25,17 @@ export function Game() {
   });
 
   const leaderBoardModal = useDisclosure();
-  const isPlaying = gameController.gameStatus === 'typing';
   const isGameOver = gameController.gameStatus === 'finished';
 
-  const hasMadeLeaderboardQuery = trpc.useQuery([
-    'leaderboard.check-if-made-leader-board',
-    gameController.charactersPerMinute,
-  ]);
+  const hasMadeLeaderboardQuery = trpc.useQuery(
+    [
+      'leaderboard.check-if-made-leader-board',
+      gameController.charactersPerMinute,
+    ],
+    {
+      enabled: isGameOver,
+    }
+  );
 
   React.useEffect(
     function checkIfMadeLeaderboard() {
@@ -54,13 +58,7 @@ export function Game() {
         }}
       />
 
-      <Center
-        mt={'-10vh'}
-        h="90vh"
-        w="full"
-        flexDir="column"
-        color="yellow.400"
-      >
+      <Center mt="-10vh" h="90vh" w="full" flexDir="column" color="yellow.400">
         <Box userSelect="none" w="3xl" fontSize="30px">
           <Flex justifyContent="center">
             <Text as="samp">{gameController.remainingTime}</Text>
@@ -69,7 +67,7 @@ export function Game() {
           <Box position="relative" wordBreak="break-all" fontWeight="semibold">
             <Box position="absolute" inset="0">
               <Text as="samp">{gameController.input}</Text>
-              {isPlaying && <Cursor />}
+              {gameController.gameStatus === 'typing' && <Cursor />}
             </Box>
             <Text as="samp" color="gray.400">
               {gameController.words}
@@ -78,16 +76,16 @@ export function Game() {
         </Box>
 
         <Button
-          aria-disabled={!isGameOver}
           color="gray.300"
           variant="link"
           fontSize="xl"
-          mt={4}
+          mt="4px"
           onClick={gameController.restart}
-          disabled={!isGameOver}
+          isDisabled={gameController.gameStatus === 'idle'}
+          type="button"
         >
           <motion.div
-            key={`${isGameOver}`}
+            key={String(isGameOver)}
             animate={isGameOver && { scale: [1, 1.1, 1] }}
             transition={{
               duration: 0.5,

@@ -19,7 +19,7 @@ export function LeaderBoard() {
 
   if (!leaderboardQuery.data) {
     return (
-      <Center h={'80vh'}>
+      <Center h="80vh">
         <Spinner color="yellow.400" />
       </Center>
     );
@@ -58,7 +58,7 @@ export function LeaderBoard() {
                 <Td>{record.name}</Td>
                 <Td>{record.createdAt.toDateString()}</Td>
                 <Td>{record.charactersPerMinute}</Td>
-                <Td>{record.accuracyPercent}</Td>
+                <Td>{`${record.accuracyPercent}%`}</Td>
                 <Td>{record.mistakeCount}</Td>
               </Tr>
             );

@@ -52,8 +52,9 @@ export function useGameController(options: UseGameControllerOptions) {
   );
 
   useEvent('keydown', (event: KeyboardEvent) => {
-    if (state.gameStatus === 'finished' || !isKeyboardCodeAllowed(event.code))
+    if (state.gameStatus === 'finished' || !isKeyboardCodeAllowed(event.code)) {
       return;
+    }
 
     if (state.gameStatus === 'idle') {
       setState.setGameState('typing');
@@ -92,7 +93,10 @@ function isKeyboardCodeAllowed(code: string): boolean {
   return code.startsWith('Key') || code === 'Space';
 }
 
-function calculateCharactersPerMinute(characters: number, time: number): number {
+function calculateCharactersPerMinute(
+  characters: number,
+  time: number
+): number {
   if (characters === 0 || time === 0) return 0;
   return Math.round(characters / (time / 60));
 }

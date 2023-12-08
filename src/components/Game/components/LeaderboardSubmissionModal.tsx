@@ -44,7 +44,7 @@ export function LeaderboardSubmissionModal(
         <ModalCloseButton color="gray.400" />
 
         <ModalBody>
-          <Stack mb={6}>
+          <Stack mb="6px">
             <Text>Accuracy: {props.results.accuracyPercent}%</Text>
             <Text>Mistakes: {props.results.mistakeCount}</Text>
             <Text>CPM: {props.results.charactersPerMinute}</Text>
@@ -56,10 +56,16 @@ export function LeaderboardSubmissionModal(
         </ModalBody>
 
         <ModalFooter>
-          <Button mr={3} variant="ghost" onClick={props.onClose}>
+          <Button
+            mr="3px"
+            variant="ghost"
+            onClick={props.onClose}
+            type="button"
+          >
             Not Interested
           </Button>
           <Button
+            type="button"
             colorScheme="yellow"
             isLoading={addToLeaderboardMutation.isLoading}
             onClick={async () => {
