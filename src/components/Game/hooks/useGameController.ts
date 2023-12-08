@@ -8,39 +8,47 @@ type UseGameControllerOptions = {
   wordCount: number;
 };
 
+const initialState = {
+  gameStatus: 'idle' as 'idle' | 'typing' | 'finished',
+  input: '',
+  countDown: 0,
+  currentPosition: 0,
+  mistakeCount: 0,
+};
+
 export function useGameController(options: UseGameControllerOptions) {
   const counter = useCountDown(options.time);
 
-  const initialState = {
-    gameStatus: 'idle',
-    words: generateRandomWords(options.wordCount),
-    input: '',
-    countDown: options.time,
-    currentPosition: 0,
-    mistakeCount: 0,
-  };
-
-  const [state, setState] = useMethods((state: typeof initialState) => {
-    return {
-      restart() {
-        counter.reset();
-        return initialState;
-      },
-      onMatch(key: string) {
-        return {
-          ...state,
-          input: state.input.concat(key),
-          currentPosition: state.currentPosition + 1,
-        };
-      },
-      setGameState(newState: 'idle' | 'typing' | 'finished') {
-        return { ...state, gameStatus: newState };
-      },
-      incrementMistakeCounter() {
-        return { ...state, mistakeCount: state.mistakeCount + 1 };
-      },
-    };
-  }, initialState);
+  const [state, setState] = useMethods(
+    (state) => {
+      return {
+        restart() {
+          counter.reset();
+          return {
+            ...initialState,
+            words: generateRandomWords(options.wordCount),
+          };
+        },
+        onMatch(key: string) {
+          return {
+            ...state,
+            input: state.input.concat(key),
+            currentPosition: state.currentPosition + 1,
+          };
+        },
+        setGameState(newState: 'idle' | 'typing' | 'finished') {
+          return { ...state, gameStatus: newState };
+        },
+        incrementMistakeCounter() {
+          return { ...state, mistakeCount: state.mistakeCount + 1 };
+        },
+      };
+    },
+    {
+      ...initialState,
+      words: generateRandomWords(options.wordCount),
+    }
+  );
 
   React.useEffect(
     function onCountDownEnd() {

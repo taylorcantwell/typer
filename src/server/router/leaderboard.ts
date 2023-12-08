@@ -22,7 +22,6 @@ export const leaderboardRouter = createRouter()
           return true;
         }
       }
-
       return false;
     },
   })
@@ -47,7 +46,6 @@ export const leaderboardRouter = createRouter()
       await ctx.prisma.leaderBoard.create({
         data: input,
       });
-
       return { success: true };
     },
   });
