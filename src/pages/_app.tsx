@@ -3,7 +3,7 @@ import { withTRPC } from '@trpc/next';
 import type { AppType } from 'next/dist/shared/lib/utils';
 import superjson from 'superjson';
 
-import { AppShell } from '../components/AppShell';
+import { AppShell } from '../components';
 import type { AppRouter } from '../server/router/root';
 import '../styles/globals.css';
 

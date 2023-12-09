@@ -1,13 +1,14 @@
 import type { NextPage } from 'next';
 import dynamic from 'next/dynamic';
 
-const Home = dynamic(
+const Index = dynamic(
+  //@ts-ignore
   () => import('../components/Game/Game').then((module) => module.Game),
   { ssr: false }
 );
 
-const HomePage: NextPage = () => {
-  return <Home />;
+const IndexPage: NextPage = () => {
+  return <Index />;
 };
 
-export default HomePage;
+export default IndexPage;

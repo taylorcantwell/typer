@@ -59,7 +59,7 @@ function NavLink(props: NavLinkProps) {
 }
 
 function useIsMobile() {
-  const isMobileView = useMedia('(max-width: 768px)');
+  const isMobileView = useMedia('(max-width: 768px)', false);
   const [isMobile, setIsMobile] = React.useState(false);
 
   React.useEffect(() => {

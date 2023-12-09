@@ -1,4 +1,5 @@
 import { z } from 'zod';
+
 import { createRouter } from '../createRouter';
 
 export const leaderboardRouter = createRouter()

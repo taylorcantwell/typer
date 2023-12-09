@@ -8,8 +8,7 @@ import {
   Td,
   Th,
   Thead,
-  Tr,
-  Link,
+  Tr
 } from '@chakra-ui/react';
 
 import { trpc } from '../utils/trpc';
