@@ -20,7 +20,7 @@ import { useGameController } from './hooks';
 
 export function Game() {
   const gameController = useGameController({
-    time: 20,
+    timeSeconds: 20,
     wordCount: 30,
   });
 
@@ -58,7 +58,8 @@ export function Game() {
         }}
       />
 
-      <Center mt="-10vh" h="90vh" w="full" flexDir="column" color="yellow.400">
+      <Center mt="-10vh" h="100vh" w="full" flexDir="column" color="yellow.400">
+        {gameController.audioElement}
         <Box userSelect="none" w="3xl" fontSize="30px">
           <Flex justifyContent="center">
             <Text as="samp">{gameController.remainingTime}</Text>
@@ -79,7 +80,7 @@ export function Game() {
           color="gray.300"
           variant="link"
           fontSize="xl"
-          mt="4px"
+          mt="4"
           onClick={gameController.restart}
           isDisabled={gameController.gameStatus === 'idle'}
           type="button"
@@ -98,16 +99,26 @@ export function Game() {
         </Button>
 
         <Flex
-          mt={8}
+          mt="8"
           fontSize="xl"
           fontWeight="bold"
-          gap={8}
+          gap="4"
           alignItems="center"
         >
           <Text as="samp">Accuracy: {gameController.accuracy}%</Text>
           <Text as="samp">CPM: {gameController.charactersPerMinute}</Text>
           <MistakeCounter mistakes={gameController.mistakeCount} />
         </Flex>
+
+        <Button
+          position="absolute"
+          left="10"
+          bottom="10"
+          type="button"
+          onClick={gameController.toggleAudio}
+        >
+          {gameController.audioStatus.muted ? '🔇' : '🔊'}
+        </Button>
       </Center>
     </>
   );

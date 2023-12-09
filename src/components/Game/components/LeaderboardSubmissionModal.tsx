@@ -14,7 +14,7 @@ import { useRouter } from 'next/router';
 import * as React from 'react';
 import Confetti from 'react-confetti';
 
-import { useWindowSize } from 'react-use';
+import { useWindowSize, useLocalStorage } from 'react-use';
 import { trpc } from '../../../utils/trpc';
 
 type Results = {
@@ -32,7 +32,7 @@ type LeaderBoardSubmissionModalProps = {
 export function LeaderboardSubmissionModal(
   props: LeaderBoardSubmissionModalProps
 ) {
-  const [name, setName] = React.useState('Anonymous');
+  const [name, setName] = useLocalStorage('name', 'Anonymous');
   const router = useRouter();
   const addToLeaderboardMutation = trpc.useMutation(['leaderboard.add']);
 
@@ -44,7 +44,7 @@ export function LeaderboardSubmissionModal(
         <ModalCloseButton color="gray.400" />
 
         <ModalBody>
-          <Stack mb="6px">
+          <Stack mb="6">
             <Text>Accuracy: {props.results.accuracyPercent}%</Text>
             <Text>Mistakes: {props.results.mistakeCount}</Text>
             <Text>CPM: {props.results.charactersPerMinute}</Text>
@@ -52,16 +52,12 @@ export function LeaderboardSubmissionModal(
           <Input
             onChange={(e) => setName(e.target.value)}
             placeholder="Add your name"
+            value={name}
           />
         </ModalBody>
 
         <ModalFooter>
-          <Button
-            mr="3px"
-            variant="ghost"
-            onClick={props.onClose}
-            type="button"
-          >
+          <Button mr="3" variant="ghost" onClick={props.onClose} type="button">
             Not Interested
           </Button>
           <Button
@@ -73,7 +69,7 @@ export function LeaderboardSubmissionModal(
                 accuracyPercent: props.results.accuracyPercent,
                 charactersPerMinute: props.results.charactersPerMinute,
                 mistakeCount: props.results.mistakeCount,
-                name,
+                name: name!,
               });
 
               router.push('/leaderboard');

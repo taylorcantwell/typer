@@ -1,4 +1,4 @@
-import { useEvent, useMethods } from 'react-use';
+import { useAudio, useEvent, useMethods } from 'react-use';
 import * as React from 'react';
 
 import { useCountDown } from './useCountDown';
@@ -14,12 +14,15 @@ const initialState = {
 };
 
 type UseGameControllerOptions = {
-  time: number;
+  timeSeconds: number;
   wordCount: number;
 };
 
 export function useGameController(options: UseGameControllerOptions) {
-  const counter = useCountDown(options.time);
+  const counter = useCountDown(options.timeSeconds);
+  const [audioElement, audioState, audioControls] = useAudio({
+    src: 'https://cdn.freesound.org/previews/142/142608_1840739-lq.mp3',
+  });
 
   const [gameState, gameController] = useMethods(
     (state) => {
@@ -88,11 +91,17 @@ export function useGameController(options: UseGameControllerOptions) {
         counter.stop();
       }
     } else {
+      audioControls.play();
       gameController.incrementMistakeCounter();
     }
   });
 
   return {
+    audioElement,
+    audioStatus: audioState,
+    toggleAudio: () => {
+      audioState.muted ? audioControls.unmute() : audioControls.mute();
+    },
     gameStatus: gameState.gameStatus,
     words: gameState.words,
     input: gameState.input,
@@ -103,7 +112,7 @@ export function useGameController(options: UseGameControllerOptions) {
     ),
     charactersPerMinute: calculateCharactersPerMinute(
       gameState.currentPosition,
-      options.time - counter.state.currentTime
+      options.timeSeconds - counter.state.currentTime
     ),
     mistakeCount: gameState.mistakeCount,
     restart: gameController.restart,
