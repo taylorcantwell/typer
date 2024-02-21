@@ -24,7 +24,7 @@ export function useCountDown(countDown: number) {
   React.useEffect(function expire() {
     if (state.currentTime === 0 && !state.expired) {
       counter.expire();
-      return clearInterval(intervalRef.current!);
+      return () => clearInterval(intervalRef.current!);
     }
   });
 

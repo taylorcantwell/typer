@@ -5,7 +5,7 @@ import {
   Center,
   Flex,
   Text,
-  useDisclosure,
+  useDisclosure
 } from '@chakra-ui/react';
 import { motion } from 'framer-motion';
 import * as React from 'react';
@@ -14,7 +14,7 @@ import { trpc } from '../../utils/trpc';
 import {
   Cursor,
   LeaderboardSubmissionModal,
-  MistakeCounter,
+  MistakeCounter
 } from './components';
 import { useGameController } from './hooks';
 

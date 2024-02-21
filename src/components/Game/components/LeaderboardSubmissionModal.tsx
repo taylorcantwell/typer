@@ -8,13 +8,12 @@ import {
   ModalFooter,
   ModalHeader,
   Stack,
-  Text,
+  Text
 } from '@chakra-ui/react';
 import { useRouter } from 'next/router';
-import * as React from 'react';
 import Confetti from 'react-confetti';
 
-import { useWindowSize, useLocalStorage } from 'react-use';
+import { useLocalStorage, useWindowSize } from 'react-use';
 import { trpc } from '../../../utils/trpc';
 
 type Results = {

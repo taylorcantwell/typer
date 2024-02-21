@@ -46,8 +46,7 @@ type NavLinkProps = {
 };
 
 function NavLink(props: NavLinkProps) {
-  const router = useRouter();
-  const isActive = router.asPath === props.href;
+  const isActive = useRouter().asPath === props.href;
 
   return (
     <NextLink href={props.href} passHref>
@@ -58,6 +57,7 @@ function NavLink(props: NavLinkProps) {
   );
 }
 
+// SSR shenanigans
 function useIsMobile() {
   const isMobileView = useMedia('(max-width: 768px)', false);
   const [isMobile, setIsMobile] = React.useState(false);
